@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pocket Money - AI Expense Intelligence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .phone-container {
+            max-width: 375px;
+            margin: 0 auto;
+            background: #f8f9fa;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            min-height: 812px;
+        }
+
+        .status-bar {
+            background: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .app-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .app-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 20px;
+            min-height: 500px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .summary-card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .amount-display {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            height: 200px;
+            position: relative;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .category-details h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .category-details p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .category-amount {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .merchant-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .transaction-details h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .transaction-details p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .transaction-amount {
+            text-align: right;
+        }
+
+        .transaction-amount .amount {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .transaction-amount .date {
+            font-size: 11px;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .notification-sim {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .notification-sim h3 {
+            font-size: 14px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .notification-sim p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .insight-alert {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .insight-alert strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .master-data-form {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .master-data-list {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+        }
+
+        .master-data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .master-data-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 180px;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            min-height: 20px;
+            transition: all 0.3s;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .settings-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 28px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        .premium-banner {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .premium-banner h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .premium-banner p {
+            font-size: 14px;
+            margin-bottom: 15px;
+            opacity: 0.95;
+        }
+
+        .premium-banner .price {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .feature-list {
+            text-align: left;
+            margin: 15px 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 🔋</span>
+        </div>
+
+        <div class="app-header">
+            <h1>💰 Pocket Money</h1>
+            <p>AI Expense Intelligence</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('transactions')">Transactions</button>
+            <button class="nav-tab" onclick="switchTab('categories')">Categories</button>
+            <button class="nav-tab" onclick="switchTab('settings')">Settings</button>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard Screen -->
+            <div id="dashboard" class="screen active">
+                <div class="summary-card">
+                    <h2>Monthly Summary</h2>
+                    <p style="font-size: 14px; color: #999;">March 2025</p>
+                    <div class="amount-display">$15,234 MXN</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 76%;"></div>
+                    </div>
+                    <p style="font-size: 13px; color: #666; margin-top: 8px;">76% of last month</p>
+                </div>
+
+                <div class="insight-alert">
+                    <strong>⚠️ Spending Alert</strong>
+                    Your Food & Dining expenses increased 32% compared to last month. Consider reviewing your dining habits.
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <div class="label">Transactions</div>
+                        <div class="value">142</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Savings Rate</div>
+                        <div class="value">18%</div>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <h2>Spending by Category</h2>
+                    <div class="chart-bar">
+                        <div class="bar" style="height: 85%;">
+                            <div class="bar-label">Food</div>
+                        </div>
+                        <div class="bar" style="height: 60%;">
+                            <div class="bar-label">Transport</div>
+                        </div>
+                        <div class="bar" style="height: 45%;">
+                            <div class="bar-label">Shopping</div>
+                        </div>
+                        <div class="bar" style="height: 30%;">
+                            <div class="bar-label">Bills</div>
+                        </div>
+                        <div class="bar" style="height: 20%;">
+                            <div class="bar-label">Other</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <h2>Top Categories</h2>
+                    <div class="category-item">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #FFE5E5;">🍔</div>
+                            <div class="category-details">
+                                <h3>Food & Dining</h3>
+                                <p>52 transactions</p>
+                            </div>
+                        </div>
+                        <div class="category-amount">$4,850</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #E5F3FF;">🚗</div>
+                            <div class="category-details">
+                                <h3>Transportation</h3>
+                                <p>38 transactions</p>
+                            </div>
+                        </div>
+                        <div class="category-amount">$3,200</div>
+                    </div>
+                    <div class="category-item">
+                        <div class="category-info">
+                            <div class="category-icon" style="background: #FFF5E5;">🛍️</div>
+                            <div class="category-details">
+                                <h3>Shopping</h3>
+                                <p>24 transactions</p>
+                            </div>
+                        </div>
+                        <div class="category-amount">$2,450</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Screen -->
+            <div id="transactions" class="screen">
+                <div class="notification-sim">
+                    <h3>📱 Bank Notification Detected</h3>
+                    <p>BBVA: Purchase at STARBUCKS INSURGENTES for $89.50 MXN on 03/13/2025</p>
+                    <button class="btn-primary" onclick="captureTransaction()">Capture Transaction</button>
+                </div>
+
+                <div class="summary-card">
+                    <h2>Recent Transactions</h2>
+                    <div id="transactionsList">
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="merchant-icon">S</div>
+                                <div class="transaction-details">
+                                    <h3>Starbucks</h3>
+                                    <p>Food & Dining</p>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount">$89.50</div>
+                                <div class="date">Mar 13</div>
+                            </div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="merchant-icon">U</div>
+                                <div class="transaction-details">
+                                    <h3>Uber</h3>
+                                    <p>Transportation</p>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount">$125.00</div>
+                                <div class="date">Mar 13</div>
+                            </div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="merchant-icon">C</div>
+                                <div class="transaction-details">
+                                    <h3>Costco</h3>
+                                    <p>Groceries</p>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount">$1,245.00</div>
+                                <div class="date">Mar 12</div>
+                            </div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="merchant-icon">N</div>
+                                <div class="transaction-details">
+                                    <h3>Netflix</h3>
+                                    <p>Entertainment</p>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount">$299.00</div>
+                                <div class="date">Mar 11</div>
+                            </div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="merchant-icon">A</div>
+                                <div class="transaction-details">
+                                    <h3>Amazon</h3>
+                                    <p>Shopping</p>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount">$856.50</div>
+                                <div class="date">Mar 10</div>
+                            </div>
+                        </div>
+                        <div class="transaction-item">
+                            <div class="transaction-info">
+                                <div class="merchant-icon">S</div>
+                                <div class="transaction-details">
+                                    <h3>Soriana</h3>
+                                    <p>Groceries</p>
+                                </div>
+                            </div>
+                            <div class="transaction-amount">
+                                <div class="amount">$654.20</div>
+                                <div class="date">Mar 10</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Screen -->
+            <div id="categories" class="screen">
+                <div class="master-data-form">
+                    <h2 style="margin-bottom: 15px; font-size: 18px;">Add Merchant Mapping</h2>
+                    <div class="form-group">
+                        <label>Merchant Name</label>
+                        <input type="text" id="merchantName" placeholder="e.g., Starbucks" />
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="merchantCategory">
+                            <option value="">Select Category</option>
+                            <option value="Food & Dining">Food & Dining</option>
+                            <option value="Groceries">Groceries</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Bills & Utilities">Bills & Utilities</option>
+                            <option value="Health">Health</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="addMasterData()">Add Mapping</button>
+                </div>
+
+                <div class="master-data-list">
+                    <h2 style="margin-bottom: 15px; font-size: 18px;">Merchant Mappings</h2>
+                    <div id="masterDataList">
+                        <div class="master-data-item">
+                            <span style="font-weight: 600;">Starbucks</span>
+                            <span class="badge">Food & Dining</span>
+                        </div>
+                        <div class="master-data-item">
+                            <span style="font-weight: 600;">Uber</span>
+                            <span class="badge">Transportation</span>
+                        </div>
+                        <div class="master-data-item">
+                            <span style="font-weight: 600;">Costco</span>
+                            <span class="badge">Groceries</span>
+                        </div>
+                        <div class="master-data-item">
+                            <span style="font-weight: 600;">Netflix</span>
+                            <span class="badge">Entertainment</span>
+                        </div>
+                        <div class="master-data-item">
+                            <span style="font-weight: 600;">Amazon</span>
+                            <span class="badge">Shopping</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-card" style="margin-top: 20px;">
+                    <h2>Category Insights</h2>
+                    <p style="font-size: 13px; color: #666; margin-top: 8px;">
+                        You have defined 5 merchant mappings. Future transactions from these merchants will be automatically categorized.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Settings Screen -->
+            <div id="settings" class="screen">
+                <div class="premium-banner">
+                    <h2>✨ Upgrade to Premium</h2>
+                    <p>Get advanced features and insights</p>
+                    <div class="price">$20 USD/month</div>
+                    <ul class="feature-list">
+                        <li>AI Auto-categorization</li>
+                        <li>Advanced Analytics</li>
+                        <li>Cloud Backup & Sync</li>
+                        <li>Multi-device Support</li>
+                        <li>Enhanced Behavioral Insights</li>
+                    </ul>
+                    <button class="btn-primary" style="background: white; color: #f5576c;" onclick="alert('Premium subscription coming soon!')">Upgrade Now</button>
+                </div>
+
+                <div class="settings-card">
+                    <h2 style="margin-bottom: 15px; font-size: 18px;">Notifications</h2>
+                    <div class="setting-item">
+                        <span>Transaction Alerts</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>Spending Alerts</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>Monthly Summary</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h2 style="margin-bottom: 15px; font-size: 18px;">Privacy & Security</h2>
+                    <div class="setting-item">
+                        <span>Local Data Storage</span>
+                        <span style="color: #4CAF50; font-weight: 600;">✓ Active</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>Data Encryption</span>
+                        <span style="color: #4CAF50; font-weight: 600;">✓ Enabled</span>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h2 style="margin-bottom: 15px; font-size: 18px;">About</h2>
+                    <div class="setting-item">
+                        <span>Version</span>
+                        <span style="color: #999;">1.0.0 (MVP)</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>Support</span>
+                        <span style="color: #667eea; cursor: pointer;" onclick="alert('Support: support@pocketmoney.app')">Contact Us</span>
+                    </div>
+                </div>
+
+                <button class="btn-primary" style="background: #f44336; margin-top: 20px;" onclick="alert('All local data cleared!')">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected screen
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        function captureTransaction() {
+            const notification = document.querySelector('.notification-sim');
+            notification.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 15px;">✓</div>
+                    <h3 style="color: #4CAF50; margin-bottom: 10px;">Transaction Captured!</h3>
+                    <p style="font-size: 13px; color: #666;">
+                        Starbucks purchase of $89.50 MXN has been automatically categorized as "Food & Dining"
+                    </p>
+                </div>
+            `;
+
+            // Add new transaction to the list
+            const transactionsList = document.getElementById('transactionsList');
+            const newTransaction = document.createElement('div');
+            newTransaction.className = 'transaction-item';
+            newTransaction.style.animation = 'fadeIn 0.5s';
+            newTransaction.innerHTML = `
+                <div class="transaction-info">
+                    <div class="merchant-icon" style="background: linear-gradient(135deg, #4CAF50, #45a049);">S</div>
+                    <div class="transaction-details">
+                        <h3>Starbucks</h3>
+                        <p>Food & Dining</p>
+                    </div>
+                </div>
+                <div class="transaction-amount">
+                    <div class="amount">$89.50</div>
+                    <div class="date">Just now</div>
+                </div>
+            `;
+            transactionsList.insertBefore(newTransaction, transactionsList.firstChild);
+
+            // Reset notification after 3 seconds
+            setTimeout(() => {
+                notification.innerHTML = `
+                    <h3>📱 Bank Notification Detected</h3>
+                    <p>BBVA: Purchase at OXXO for $45.00 MXN on 03/13/2025</p>
+                    <button class="btn-primary" onclick="captureTransaction()">Capture Transaction</button>
+                `;
+            }, 3000);
+        }
+
+        function addMasterData() {
+            const merchantName = document.getElementById('merchantName').value;
+            const merchantCategory = document.getElementById('merchantCategory').value;
+
+            if (!merchantName || !merchantCategory) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const masterDataList = document.getElementById('masterDataList');
+            const newItem = document.createElement('div');
+            newItem.className = 'master-data-item';
+            newItem.style.animation = 'fadeIn 0.5s';
+            newItem.innerHTML = `
+                <span style="font-weight: 600;">${merchantName}</span>
+                <span class="badge">${merchantCategory}</span>
+            `;
+            masterDataList.insertBefore(newItem, masterDataList.firstChild);
+
+            // Clear form
+            document.getElementById('merchantName').value = '';
+            document.getElementById('merchantCategory').value = '';
+
+            // Show success message
+            alert(`Merchant mapping added! Future transactions from "${merchantName}" will be categorized as "${merchantCategory}"`);
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(bar => {
+                const currentHeight = parseInt(bar.style.height);
+                const variation = Math.random() * 10 - 5;
+                const newHeight = Math.max(20, Math.min(100, currentHeight + variation));
+                bar.style.height = newHeight + '%';
+            });
+        }, 5000);
+
+        // Initialize with some animations
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const insightAlert = document.querySelector('.insight-alert');
+                if (insightAlert) {
+                    insightAlert.style.animation = 'fadeIn 0.5s';
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
